@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AGC‑Pathfinder — AI Study Companion</title>
+  <meta name="description" content="A visually appealing, AI-powered study companion with interactive tools." />
+  <style>
+    /* --- CSS Variables and Base Styles --- */
+    :root{
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #818cf8;
+      --accent-dark: #6366f1;
+      --glass: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: rgba(2, 6, 23, 0.4);
+    }
+    body.light-theme {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --glass: rgba(0, 0, 0, 0.04);
+      --border: rgba(0, 0, 0, 0.1);
+      --shadow: rgba(100, 116, 139, 0.1);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, 'Helvetica Neue', Arial;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.5;
+      transition: background 0.3s, color 0.3s;
+    }
+    main{max-width:1100px;margin:24px auto;padding:0 20px}
+    :target{scroll-margin-top:90px}
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent-dark); }
+    h1,h2,h3,h4{margin-top:0; color: var(--text);}
+    h1{font-size: clamp(28px, 5vw, 36px); margin:12px 0 8px;}
+    h2{border-bottom: 1px solid var(--border); padding-bottom: 8px;}
+    p.lead{color:var(--muted);margin:0 0 20px; font-size: 1.1rem;}
+    .small{font-size:14px; color: var(--muted)}
+
+    /* --- Header & Navigation --- */
+    header{
+      position: sticky; top: 0; z-index: 10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 20px; max-width:1100px; margin:0 auto;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    body.light-theme header { background: rgba(241, 245, 249, 0.8); }
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent-dark),#38bdf8);display:grid;place-items:center;font-weight:700;color:white}
+    nav a{color:var(--muted); margin-left:16px;}
+    nav a:hover{color:white}
+    body.light-theme nav a:hover{color:var(--accent-dark)}
+    .theme-toggle{background:var(--glass); border:1px solid var(--border); color: var(--text); width:40px; height:40px; border-radius:10px; cursor:pointer; display:grid; place-items:center; margin-left:16px;}
+    
+    /* --- General Components (Cards, Buttons, etc.) --- */
+    .card{
+      background:var(--card); border-radius:16px; padding:24px;
+      box-shadow:0 8px 30px var(--shadow); border: 1px solid var(--border);
+      transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 35px var(--shadow); }
+    .btn{
+      display:inline-block; padding:10px 16px; border-radius:10px;
+      background:var(--accent); color:white; text-decoration:none;
+      font-weight:600; border:none; cursor:pointer; transition: background-color 0.2s, transform 0.1s;
+    }
+    .btn:hover{background-color: var(--accent-dark); transform: scale(1.05);}
+    .btn:active{transform: scale(0.98);}
+    .btn:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+    .btn.secondary{background:var(--glass); border:1px solid var(--border); color: var(--text);}
+    .btn.secondary:hover{background: var(--border); color:white;}
+    body.light-theme .btn.secondary:hover { color: var(--text); }
+    input[type=text]{
+      width:100%; padding:12px; border-radius:8px; border:1px solid var(--border);
+      background:var(--glass); color:inherit; font-family: inherit; font-size: 15px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type=text]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); outline: none; }
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:800px){.grid-2{grid-template-columns:1fr}}
+
+    /* --- Page Sections --- */
+    .hero{display:grid; grid-template-columns:1fr 400px; gap:28px; align-items:center;}
+    @media(max-width:880px){.hero{grid-template-columns:1fr}}
+    .features{display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;}
+    .feature-item{padding:16px; border-radius:12px; background:var(--glass); border: 1px solid var(--border);}
+    
+    /* --- Subject Tracker --- */
+    #tracker-input-container { display: flex; gap: 10px; }
+    #tracker-input-container input { flex-grow: 1; }
+    .tracker-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+    .tracker-list li { background: var(--glass); padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; transition: background 0.2s; }
+    .tracker-list li:hover { background: var(--border); }
+    .list-item-controls button { background: none; border: none; cursor: pointer; padding: 4px; }
+    .list-item-controls button svg { width: 20px; height: 20px; stroke: var(--muted); transition: stroke 0.2s; }
+    .list-item-controls button:hover svg { stroke: var(--text); }
+    .list-item-controls button.complete-btn:hover svg { stroke: #4ade80; } /* green */
+    .list-item-controls button.delete-btn:hover svg { stroke: #f87171; } /* red */
+    .achievement-item { opacity: 0.6; }
+    .achievement-item span { text-decoration: line-through; }
+    @media(max-width:600px){.tracker-columns{grid-template-columns:1fr}}
+    
+    /* --- AI Helpers & Ranking --- */
+    .ai-response {
+      background: var(--glass);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 50px;
+    }
+    .ai-response strong { color: var(--text); }
+    .ai-response ul { padding-left: 20px; margin: 8px 0; }
+    .ranking-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .ranking-table th, .ranking-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    .ranking-table tr.user-rank { background: color-mix(in srgb, var(--accent) 15%, transparent); font-weight: bold; }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">AGC</div>
+      <div>
+        <div style="font-weight:700">AGC‑Pathfinder</div>
+        <div style="font-size:13px;color:var(--muted)">AI-powered study companion</div>
+      </div>
+    </div>
+    <nav class="small">
+      <a href="#features">Features</a>
+      <a href="#tracker">Tracker</a>
+      <a href="#ranking">Ranking</a>
+      <a href="#ai-helpers">AI Helpers</a>
+      <a href="#contact">Contact</a>
+      <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">☀️</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="about" class="card hero">
+      <div>
+        <span class="kicker" style="display:inline-block; padding:6px 12px; border-radius:999px; background:var(--glass); color:var(--muted); font-size:13px;">Made by Aarav, Gemini, and ChatGPT</span>
+        <h1>Unlock Your Learning Potential</h1>
+        <p class="lead">AGC-Pathfinder combines intelligent tools, progress tracking, and powerful AI helpers to make your study sessions focused and effective.</p>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <a class="btn" href="#features">Explore features</a>
+          <a class="btn secondary" href="#contact">Get in touch</a>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="text-align:center; padding: 16px;">
+          <svg width="100%" height="160" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <rect x="0" y="0" width="220" height="160" rx="12" fill="var(--glass)" />
+            <circle cx="60" cy="60" r="28" fill="color-mix(in srgb, var(--accent) 15%, transparent)" />
+            <path d="M48 60L58 70L75 52" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            <rect x="100" y="30" width="90" height="18" rx="6" fill="#38bdf820" />
+            <rect x="100" y="60" width="70" height="12" rx="6" fill="var(--glass)" />
+            <rect x="30" y="110" width="160" height="24" rx="12" fill="var(--glass)" />
+          </svg>
+          <div style="color:var(--muted);font-size:13px;margin-top:8px">A modern, single-file web application</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" style="margin-top:40px">
+      <h2>Core Features</h2>
+      <div class="features" style="margin-top: 20px;">
+        <div class="feature-item">
+          <strong>Dual AI Helpers</strong>
+          <p class="small" style="margin:6px 0">Get deep study plans from ADIT and quick quizzes from ARYAN.</p>
+        </div>
+        <div class="feature-item">
+          <strong>Subject Tracker</strong>
+          <p class="small" style="margin:6px 0">Organize your study topics and visualize your achievements.</p>
+        </div>
+        <div class="feature-item">
+          <strong>Motivation Tools</strong>
+          <p class="small" style="margin:6px 0">A ranking system to keep you competitive and motivated.</p>
+        </div>
+        <div class="feature-item">
+          <strong>Sleek & Fast UI</strong>
+          <p class="small" style="margin:6px 0">A clean, responsive interface with a light/dark theme toggle.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="tracker" class="card" style="margin-top:40px;">
+        <h2>Subject Tracker</h2>
+        <p class="small">Add subjects to your to-do list. Mark them as complete to move them to your achievements.</p>
+        <div id="tracker-input-container" style="margin-top: 16px;">
+            <input id="new-subject" type="text" placeholder="e.g., Quantum Mechanics" />
+            <button class="btn" onclick="addSubject()">Add Subject</button>
+        </div>
+        <div class="tracker-columns">
+            <div>
+                <h4>Subjects to Master</h4>
+                <ul id="todo-list" class="tracker-list" style="padding:0; list-style:none;"></ul>
+            </div>
+            <div>
+                <h4>Achievements</h4>
+                <ul id="achievements-list" class="tracker-list" style="padding:0; list-style:none;"></ul>
+            </div>
+        </div>
+    </section>
+    
+    <section id="ranking" class="card" style="margin-top:24px;">
+        <h2>Ranking System</h2>
+        <p class="small">Stay motivated by seeing your position on the global leaderboard.</p>
+        <table class="ranking-table">
+            <thead><tr><th>Rank</th><th>Name</th><th>Points</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td>Alex</td><td>2450</td></tr>
+                <tr class="user-rank"><td>2</td><td>You</td><td>2210</td></tr>
+                <tr><td>3</td><td>Priya</td><td>2180</td></tr>
+                <tr><td>4</td><td>Sam</td><td>1950</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="ai-helpers" style="margin-top:40px">
+        <h2>AI Helpers</h2>
+      <div class="grid-2" style="margin-top:20px;">
+        <div id="adit" class="card">
+          <h3>ADIT - Analytical Tutor</h3>
+          <p class="small">ADIT provides deep explanations and structured study plans. Ask it a complex question.</p>
+          <div style="margin-top:16px">
+            <input id="adit-q" type="text" placeholder="e.g., Explain backpropagation" />
+            <div style="margin-top:12px; text-align:right">
+                <button id="adit-btn" class="btn" onclick="getAditSuggestion()">Ask ADIT</button>
+            </div>
+            <div id="adit-sugg" class="ai-response">Your study tip will appear here...</div>
+          </div>
+        </div>
+        <div id="aryan" class="card">
+          <h3>ARYAN - Rapid Quizzer</h3>
+          <p class="small">ARYAN generates quick questions to test your knowledge. Give it a topic.</p>
+          <div style="margin-top:16px">
+            <input id="aryan-topic" type="text" placeholder="e.g., The Krebs Cycle" />
+            <div style="margin-top:12px;text-align:right">
+                <button id="aryan-btn" class="btn" onclick="genAryanQuiz()">Ask ARYAN</button>
+            </div>
+            <div id="aryan-quiz" class="ai-response">Your quiz question will appear here...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" style="margin-top:24px" class="card">
+      <h3>Contact & Suggestions</h3>
+      <p class="small">Have questions or feedback? Please reach out!</p>
+      <p>Email: <a href="mailto:aaravsaharia960@gmail.com">aaravsaharia960@gmail.com</a></p>
+    </section>
+  </main>
+
+  <footer style="max-width:1100px;margin:60px auto 80px;color:var(--muted);text-align:center; font-size: 14px;">
+    <div>© 2025 AGC‑Pathfinder. Made with ❤️ by Aarav, Gemini, and ChatGPT.</div>
+  </footer>
+
+  <script>
+    // --- AI Helper Logic ---
+    const aditBtn = document.getElementById('adit-btn');
+    const aditOut = document.getElementById('adit-sugg');
+    const aryanBtn = document.getElementById('aryan-btn');
+    const aryanOut = document.getElementById('aryan-quiz');
+
+    // Simple markdown parser for bold and lists
+    function parseMarkdown(text) {
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+            .replace(/^\* (.*$)/gm, '<li>$1</li>') // List items
+            .replace(/(\<li\>.*\<\/li\>)/gs, '<ul>$1</ul>') // Wrap lists
+            .replace(/\n/g, '<br>'); // Newlines
+    }
+
+    async function runAi(button, outputElement, prompt) {
+        button.disabled = true;
+        outputElement.innerHTML = "🧠 Thinking...";
+
+        try {
+            // This function now calls our secure backend function, not Google directly
+            const response = await fetch('/.netlify/functions/ai-proxy', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ prompt: prompt }),
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || `Server error: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            outputElement.innerHTML = parseMarkdown(data.text);
+
+        } catch (error) {
+            console.error(error);
+            outputElement.innerHTML = `<strong>Error:</strong> Could not get a response. Please try again later.`;
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    function getAditSuggestion() {
+      const input = document.getElementById('adit-q').value.trim();
+      if(!input) { aditOut.textContent='Please ask ADIT a question.'; return; }
+      const prompt = `You are ADIT, an Analytical AI Tutor. You provide deep, structured, and helpful study plans. A student asked: "${input}". Provide a detailed study tip, a structured learning plan, or a clear explanation for this topic.`;
+      runAi(aditBtn, aditOut, prompt);
+    }
+    
+    function genAryanQuiz() {
+      const input = document.getElementById('aryan-topic').value.trim();
+      if(!input) { aryanOut.textContent = 'Please give ARYAN a topic.'; return; }
+      const prompt = `You are ARYAN, a Rapid Quiz Navigator. You generate sharp, concise quiz questions to test knowledge. A student wants a question about: "${input}". Provide one clear, challenging multiple-choice or short-answer question about this topic. Do not provide the answer.`;
+      runAi(aryanBtn, aryanOut, prompt);
+    }
+
+    // --- Theme & UI Logic (No AI dependency) ---
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const currentTheme = localStorage.getItem('theme');
+
+    function applyTheme(theme) {
+        if (theme === 'light') {
+            document.body.classList.add('light-theme');
+            themeToggleBtn.textContent = '🌙';
+        } else {
+            document.body.classList.remove('light-theme');
+            themeToggleBtn.textContent = '☀️';
+        }
+    }
+    applyTheme(currentTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      let theme = document.body.classList.contains('light-theme') ? 'dark' : 'light';
+      localStorage.setItem('theme', theme);
+      applyTheme(theme);
+    });
+
+    // --- Subject Tracker Logic ---
+    const subjectInput = document.getElementById('new-subject');
+    const todoList = document.getElementById('todo-list');
+    const achievementsList = document.getElementById('achievements-list');
+    const icons = {
+        complete: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>`,
+        delete: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.144-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.057-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>`,
+        revert: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>`
+    };
+    
+    function createTodoItem(text) {
+        const li = document.createElement('li');
+        li.dataset.text = text;
+        li.innerHTML = `
+            <span>${text}</span>
+            <div class="list-item-controls">
+                <button class="complete-btn" title="Mark as complete">${icons.complete}</button>
+                <button class="delete-btn" title="Delete">${icons.delete}</button>
+            </div>`;
+        li.querySelector('.complete-btn').onclick = () => moveToAchievements(li);
+        li.querySelector('.delete-btn').onclick = () => li.remove();
+        return li;
+    }
+
+    function createAchievementItem(text) {
+        const li = document.createElement('li');
+        li.className = 'achievement-item';
+        li.dataset.text = text;
+        li.innerHTML = `
+            <span>${text}</span>
+            <div class="list-item-controls">
+                <button class="revert-btn" title="Move back to-do">${icons.revert}</button>
+            </div>`;
+        li.querySelector('.revert-btn').onclick = () => revertToTodo(li);
+        return li;
+    }
+
+    function addSubject() {
+        const subjectText = subjectInput.value.trim();
+        if (subjectText) {
+            todoList.appendChild(createTodoItem(subjectText));
+            subjectInput.value = '';
+        }
+    }
+
+    function moveToAchievements(li) {
+        const text = li.dataset.text;
+        achievementsList.appendChild(createAchievementItem(text));
+        li.remove();
+    }
+
+    function revertToTodo(li) {
+        const text = li.dataset.text;
+        todoList.appendChild(createTodoItem(text));
+        li.remove();
+    }
+    
+    subjectInput.addEventListener('keypress', (e) => e.key === 'Enter' && addSubject());
+  </script>
+</body>
+</html>
