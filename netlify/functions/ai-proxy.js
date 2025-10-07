@@ -22,8 +22,8 @@ exports.handler = async function (event, context) {
     }
     
     // 3. Talk to the Google AI
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const genAI = new GoogleGenerativeAI(API_KEY)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
