@@ -20,10 +20,11 @@ exports.handler = async function (event, context) {
     if (!prompt) {
       return { statusCode: 400, body: "Prompt is required." };
     }
-    
-    // 3. Talk to the Google AI
-    const genAI = new GoogleGenerativeAI(API_KEY)
+
+    // 3. Talk to the Google AI (This is the single corrected section)
+    const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -33,7 +34,7 @@ exports.handler = async function (event, context) {
       statusCode: 200,
       body: JSON.stringify({ text: text }),
     };
-  } catch (error) { // <-- THIS IS THE CORRECTED LINE
+  } catch (error) {
     // If anything goes wrong, send back an error message
     console.error("Error calling Google AI:", error);
     return {
