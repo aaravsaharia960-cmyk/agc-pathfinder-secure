@@ -1,42 +1,38 @@
-// The Google AI SDK for the backend
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Groq = require("groq-sdk");
 
-// This is the main function that Netlify will run
 exports.handler = async function (event, context) {
-  // We only want to handle POST requests
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   try {
-    // 1. Get the secret API key from Netlify's secure settings
-    const API_KEY = process.env.GOOGLE_API_KEY;
-    if (!API_KEY) {
-      throw new Error("API key is not set.");
-    }
+    // 1. Get the secret key from Netlify's settings
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
 
-    // 2. Get the user's prompt from the message our website sent
+    // 2. Get the user's prompt
     const { prompt } = JSON.parse(event.body);
     if (!prompt) {
       return { statusCode: 400, body: "Prompt is required." };
     }
 
-    // 3. Talk to the Google AI (This is the single corrected section)
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    // 3. Talk to the Groq AI (using a fast Llama 3 model)
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama3-8b-8192",
+    });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = chatCompletion.choices[0]?.message?.content || "Sorry, I couldn't get a response.";
 
-    // 4. Send the AI's answer back to our website
+    // 4. Send the answer back to the website
     return {
       statusCode: 200,
       body: JSON.stringify({ text: text }),
     };
+
   } catch (error) {
-    // If anything goes wrong, send back an error message
-    console.error("Error calling Google AI:", error);
+    console.error("Error calling Groq AI:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Failed to get response from AI." }),
