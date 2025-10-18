@@ -6,49 +6,48 @@ function getSimulatedAiResponse(prompt, type = 'explanation') {
     // Quiz Responses
     if (type === 'quiz') {
         if (lowerPrompt.includes('war') || lowerPrompt.includes('ww2')) {
-            return "Here is your quiz question: **What event is considered the primary trigger for the start of World War II in Europe?**";
+            return "Quiz: **What event is considered the primary trigger for the start of World War II in Europe?**";
         }
         if (lowerPrompt.includes('krebs') || lowerPrompt.includes('cycle')) {
-            return "Here is your quiz question: **What are the main products of one turn of the Krebs cycle?** (List at least two)";
+            return "Quiz: **What are the main products of one turn of the Krebs cycle?** (List at least two)";
         }
         if (lowerPrompt.includes('python') || lowerPrompt.includes('programming')) {
-            return "Here is your quiz question: **What is the difference between a list and a tuple in Python regarding mutability?**";
+            return "Quiz: **What is the difference between a list and a tuple in Python regarding mutability?**";
         }
         // Generic fallback quiz question
-        return `Here is a sample quiz question about **${prompt}**: What are the three most important facts one should know about this topic?`;
+        return `Quiz Sample for **${prompt}**: What are the three most important facts one should know about this topic?`;
     }
 
     // Explanation Responses
     if (lowerPrompt.includes('photo') || lowerPrompt.includes('synthesis')) {
-        return `**Photosynthesis** is a fascinating process! Here is a simple study plan:
-        * **Step 1: Inputs & Outputs.** Understand that plants take in Carbon Dioxide (CO2), Water (H2O), and Sunlight energy. They produce Glucose (C6H12O6 - sugar for energy) and Oxygen (O2).
-        * **Step 2: Two Main Stages.** Learn about the 'Light-Dependent Reactions' (capture sunlight energy in chlorophyll) and the 'Calvin Cycle' (use that energy to make glucose from CO2).
-        * **Step 3: Visualize.** Try drawing a simple diagram of a plant leaf showing where these processes happen (chloroplasts!). This really helps memory!`;
+        return `**Photosynthesis Study Plan:**
+        * **Inputs & Outputs:** Plants use Carbon Dioxide (CO2), Water (H2O), and Sunlight. They produce Glucose (C6H12O6 - energy) and Oxygen (O2).
+        * **Stages:** Learn the 'Light-Dependent Reactions' (capture light) and the 'Calvin Cycle' (make glucose).
+        * **Visualize:** Draw a leaf diagram showing chloroplasts!`;
     }
     if (lowerPrompt.includes('backprop') || lowerPrompt.includes('propagation')) {
-        return `**Backpropagation** is the core algorithm for training most neural networks. Think of it like this:
-        1.  **Forward Pass:** The network takes an input (like an image) and makes a prediction (e.g., 'it's a cat').
-        2.  **Calculate Error:** It compares its prediction to the correct answer and calculates how 'wrong' it was (the error or loss).
-        3.  **Backward Pass:** This is backpropagation! The error is sent backward through the network, layer by layer. At each layer, it calculates how much each connection ('weight') contributed to the error.
-        4.  **Adjust Weights:** Based on how much they contributed, the weights are adjusted slightly in a direction that will reduce the error next time.
-        5.  **Repeat:** This whole process (forward, calculate error, backward, adjust) is repeated thousands or millions of times with many examples, making the network gradually improve.`;
+        return `**Backpropagation Explained Simply:**
+        1.  **Forward Pass:** Network makes a guess.
+        2.  **Calculate Error:** See how wrong the guess was.
+        3.  **Backward Pass:** Send the error back, calculating each connection's 'blame'.
+        4.  **Adjust Weights:** Tweak connections to reduce future error.
+        5.  **Repeat:** Do this thousands of times to learn!`;
     }
     // Generic fallback explanation
-    return `Here is a structured study plan for **${prompt}**:
-     * **Define Key Terms:** Start by identifying and writing down the definitions of the 3-5 most important vocabulary words or concepts related to "${prompt}".
-     * **Find a Core Concept:** Search for and watch a short (5-10 minute) educational video that explains the main idea simply. Try searching "Introduction to ${prompt}".
-     * **Practice / Explain:** Attempt to explain the core concept in your own words, either by writing a short paragraph or telling it to someone else. This is the best way to check your understanding!`;
+    return `**Study Plan for ${prompt}:**
+     * **Key Terms:** Define the 3-5 core terms.
+     * **Core Concept:** Watch a short intro video (search "Intro to ${prompt}").
+     * **Explain:** Try explaining it simply in your own words.`;
 }
 
 // --- DOM ELEMENT REFERENCES ---
-// Added checks to prevent errors if elements aren't found
 const aditBtn = document.getElementById('adit-btn');
-const aditOut = document.getElementById('adit-sugg');
+const aditOut = document.getElementById('adit-sugg'); // Corrected ID
 const aditInput = document.getElementById('adit-q');
 const aryanBtn = document.getElementById('aryan-btn');
 const aryanOut = document.getElementById('aryan-quiz');
 const aryanInput = document.getElementById('aryan-topic');
-const themeSelector = document.getElementById('theme-selector'); // Get the container
+const themeSelector = document.getElementById('theme-selector');
 const subjectInput = document.getElementById('new-subject');
 const todoList = document.getElementById('todo-list');
 const achievementsList = document.getElementById('achievements-list');
@@ -67,12 +66,19 @@ function runAi(button, outputElement, prompt, type) {
     setTimeout(() => {
         try {
             const responseText = getSimulatedAiResponse(prompt, type);
-            outputElement.innerHTML = parseMarkdown(responseText);
+            // Ensure output element still exists before updating
+             if(document.body.contains(outputElement)) {
+                 outputElement.innerHTML = parseMarkdown(responseText);
+             }
         } catch (error) {
             console.error("Error generating simulated response:", error);
-            outputElement.innerHTML = "<strong>Error:</strong> Could not generate response.";
+             if(document.body.contains(outputElement)) {
+                 outputElement.innerHTML = "<strong>Error:</strong> Could not generate response.";
+             }
         } finally {
-            button.disabled = false;
+             if(document.body.contains(button)) {
+                 button.disabled = false;
+             }
         }
     }, 800); // 800ms delay
 }
@@ -81,14 +87,20 @@ function runAi(button, outputElement, prompt, type) {
 window.getAditSuggestion = function() {
   if (!aditInput || !aditOut || !aditBtn) return;
   const input = aditInput.value.trim();
-  if(!input) { aditOut.textContent='Please ask ADIT a question.'; return; }
+  if(!input) {
+      if(aditOut) aditOut.textContent='Please ask ADIT a question.';
+      return;
+  }
   runAi(aditBtn, aditOut, input, 'explanation');
 }
 
 window.genAryanQuiz = function() {
   if (!aryanInput || !aryanOut || !aryanBtn) return;
   const input = aryanInput.value.trim();
-  if(!input) { aryanOut.textContent = 'Please give ARYAN a topic.'; return; }
+  if(!input) {
+      if(aryanOut) aryanOut.textContent = 'Please give ARYAN a topic.';
+      return;
+   }
   runAi(aryanBtn, aryanOut, input, 'quiz');
 }
 
@@ -98,21 +110,13 @@ function parseMarkdown(text = "") {
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
         .replace(/^\* (.*$)/gm, '<li>$1</li>'); // Convert * lines to <li>
 
-    // Wrap consecutive list items in <ul> tags
-    html = html.replace(/(<li>.*?<\/li>)/gs, (match) => {
-        // Only wrap if not already within a <ul> (basic check)
-        if (!match.includes('<ul>') && match.startsWith('<li>')) {
-            return `<ul>${match}</ul>`;
-        }
-        return match;
-    }).replace(/<\/ul>\s*<ul>/g, ''); // Merge adjacent <ul> tags
-
-    html = html.replace(/\n/g, '<br>'); // Convert remaining newlines to <br>
-    // Clean up <br> tags around list structures
-    html = html.replace(/<br>\s*<ul>/g, '<ul>');
-    html = html.replace(/<\/ul>\s*<br>/g, '</ul>');
+    // Improved list wrapping: Wrap consecutive <li> elements in <ul>
+    html = html.replace(/^(<li>.*?<\/li>\s*)+/gm, (match) => `<ul>${match.trim()}</ul>`);
+    // Remove potential <br> tags introduced before/after list items by line break conversion
     html = html.replace(/<br>\s*<li>/g, '<li>');
     html = html.replace(/<\/li>\s*<br>/g, '</li>');
+    // Convert remaining newlines to <br> only if they are not inside list structures
+    html = html.replace(/\n(?!<\/?ul>|<\/?li>)/g, '<br>');
 
     return html;
 }
@@ -123,7 +127,7 @@ const currentTheme = localStorage.getItem('theme') || 'dark';
 
 function applyTheme(theme) {
     // Clear only theme-related classes
-    document.body.classList.remove('light-theme', 'sunset-theme', 'forest-theme', 'retro-theme', 'nature-theme');
+    document.body.classList.remove('light-theme', 'sakura-theme', 'sunset-theme', 'ocean-theme', 'zen-theme');
 
     // Add the new theme class if it's not the default (dark)
     const themeClass = theme === 'dark' ? '' : `${theme}-theme`;
@@ -137,6 +141,8 @@ function applyTheme(theme) {
         themeButtons.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.theme === theme);
         });
+    } else {
+         console.warn("Theme selector buttons not found for updating active state!");
     }
 
     // Save the preference
@@ -146,31 +152,40 @@ function applyTheme(theme) {
 // Attach event listeners ONLY if the themeSelector exists
 if (themeSelector) {
     const themeButtons = themeSelector.querySelectorAll('.theme-button');
-    themeButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            applyTheme(button.dataset.theme);
+    if (themeButtons.length > 0) {
+        themeButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                 // Ensure we get the theme from the button clicked
+                 const theme = event.target.dataset.theme;
+                 if(theme) {
+                     applyTheme(theme);
+                 }
+            });
         });
-    });
-    // Apply the initial theme when the page loads
-    applyTheme(currentTheme);
+        // Apply the initial theme when the page loads
+        applyTheme(currentTheme);
+    } else {
+        console.warn("Theme selector buttons not found!");
+    }
 } else {
-    console.warn("Theme selector element not found!");
+    console.warn("Theme selector element (#theme-selector) not found!");
 }
 
 
 // --- SUBJECT TRACKER LOGIC ---
 const icons = {
-    complete: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>`,
-    delete: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.144-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.057-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>`,
-    revert: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>`
+    complete: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>`,
+    delete: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.144-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.057-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>`,
+    revert: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>`
 };
 
 function createListItem(text, isAchievement = false) {
     const li = document.createElement('li');
-    li.dataset.text = text; // Store original text
+    li.dataset.text = text;
     li.className = isAchievement ? 'achievement-item' : '';
 
     const textSpan = document.createElement('span');
+    // Sanitize text before inserting to prevent potential XSS issues if text comes from untrusted sources in future
     textSpan.textContent = text;
     li.appendChild(textSpan);
 
@@ -181,9 +196,9 @@ function createListItem(text, isAchievement = false) {
         const revertBtn = document.createElement('button');
         revertBtn.className = 'revert-btn';
         revertBtn.title = 'Move back to-do';
-        revertBtn.type = 'button'; // Explicitly set type
+        revertBtn.type = 'button';
         revertBtn.innerHTML = icons.revert;
-        revertBtn.onclick = () => revertToTodo(li);
+        revertBtn.addEventListener('click', () => revertToTodo(li)); // Use event listener
         controlsDiv.appendChild(revertBtn);
     } else {
         const completeBtn = document.createElement('button');
@@ -191,7 +206,7 @@ function createListItem(text, isAchievement = false) {
         completeBtn.title = 'Mark as complete';
         completeBtn.type = 'button';
         completeBtn.innerHTML = icons.complete;
-        completeBtn.onclick = () => moveToAchievements(li);
+        completeBtn.addEventListener('click', () => moveToAchievements(li)); // Use event listener
         controlsDiv.appendChild(completeBtn);
 
         const deleteBtn = document.createElement('button');
@@ -199,7 +214,7 @@ function createListItem(text, isAchievement = false) {
         deleteBtn.title = 'Delete';
         deleteBtn.type = 'button';
         deleteBtn.innerHTML = icons.delete;
-        deleteBtn.onclick = () => li.remove();
+        deleteBtn.addEventListener('click', () => li.remove()); // Use event listener
         controlsDiv.appendChild(deleteBtn);
     }
     li.appendChild(controlsDiv);
@@ -207,7 +222,11 @@ function createListItem(text, isAchievement = false) {
 }
 
 function addSubject() {
-    if (!subjectInput || !todoList) return;
+    // Check if elements exist before using them
+    if (!subjectInput || !todoList) {
+        console.error("Subject input or todo list element not found");
+        return;
+    }
     const subjectText = subjectInput.value.trim();
     if (subjectText) {
         const newItem = createListItem(subjectText, false);
@@ -217,22 +236,24 @@ function addSubject() {
 }
 
 function moveToAchievements(listItem) {
-    if (!achievementsList || !listItem || !listItem.dataset) return;
-    const text = listItem.dataset.text;
-    if (text) {
-      const newItem = createListItem(text, true);
-      achievementsList.appendChild(newItem);
+    if (!achievementsList || !listItem || !listItem.dataset || !listItem.dataset.text) {
+         console.error("Cannot move item to achievements - element or data missing");
+         return;
     }
+    const text = listItem.dataset.text;
+    const newItem = createListItem(text, true);
+    achievementsList.appendChild(newItem);
     listItem.remove();
 }
 
 function revertToTodo(listItem) {
-    if (!todoList || !listItem || !listItem.dataset) return;
-    const text = listItem.dataset.text;
-    if (text) {
-      const newItem = createListItem(text, false);
-      todoList.appendChild(newItem);
+    if (!todoList || !listItem || !listItem.dataset || !listItem.dataset.text) {
+        console.error("Cannot revert item to todo - element or data missing");
+        return;
     }
+    const text = listItem.dataset.text;
+    const newItem = createListItem(text, false);
+    todoList.appendChild(newItem);
     listItem.remove();
 }
 
@@ -240,18 +261,20 @@ function revertToTodo(listItem) {
 if (subjectInput) {
     subjectInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            e.preventDefault(); // Prevent potential form submission
+            e.preventDefault(); // Prevent potential form submission if inside a form
             addSubject();
         }
     });
 }
 
-// Make addSubject globally available if needed by inline onclick in HTML
+// Make functions globally available ONLY IF using inline onclick="" in HTML
+// If not using inline onclick, remove these lines
 window.addSubject = addSubject;
 
 // --- INITIALIZATION ---
-// Add any setup code here if needed when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("AGC Pathfinder Initialized!");
-    // You could load saved subjects from localStorage here if you add that feature
+    console.log("AGC Pathfinder Initialized with Themes and Animations!");
+    // Apply initial theme on DOM ready to ensure body class is set correctly
+    applyTheme(localStorage.getItem('theme') || 'dark');
+    // Load saved subjects/achievements from localStorage if implemented
 });

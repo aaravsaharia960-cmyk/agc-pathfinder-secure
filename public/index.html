@@ -4,10 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AGC‑Pathfinder — AI Study Companion</title>
-  <meta name="description" content="A visually appealing, AI-powered study companion with interactive tools." />
+  <meta name="description" content="A visually appealing, AI-powered study companion with interactive tools and animated themes." />
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  {/* Layer specifically for background animations */}
+  <div class="background-animation-layer"></div>
+
   <header>
     <div class="brand">
       <div class="logo">AGC</div>
@@ -20,7 +26,8 @@
       <a href="#about">About</a>
       <a href="#tracker">Tracker</a>
       <a href="#ai-helpers">AI</a>
-      <a href="#settings">Settings</a> </nav>
+      <a href="#settings">Settings</a>
+    </nav>
   </header>
 
   <main>
@@ -34,14 +41,14 @@
       <div>
         <div class="card illustration-card">
           <svg width="100%" height="160" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="0" y="0" width="220" height="160" rx="12" fill="var(--glass)" />
+            <rect x="0" y="0" width="220" height="160" rx="var(--card-svg-radius, 12)" fill="var(--glass)" />
             <circle cx="60" cy="60" r="28" fill="color-mix(in srgb, var(--accent) 15%, transparent)" />
             <path d="M48 60L58 70L75 52" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-            <rect x="100" y="30" width="90" height="18" rx="6" fill="color-mix(in srgb, #38bdf8 20%, transparent)" />
+            <rect x="100" y="30" width="90" height="18" rx="6" fill="color-mix(in srgb, var(--accent, #38bdf8) 20%, transparent)" />
             <rect x="100" y="60" width="70" height="12" rx="6" fill="var(--glass)" />
             <rect x="30" y="110" width="160" height="24" rx="12" fill="var(--glass)" />
           </svg>
-          <div class="illustration-caption small">A modern, single-file web application</div>
+          <div class="illustration-caption small">Enhanced UI & Interactive Features</div>
         </div>
       </div>
     </section>
@@ -76,7 +83,7 @@
             <div class="button-container">
                 <button id="adit-btn" class="btn" onclick="getAditSuggestion()">Ask ADIT</button>
             </div>
-            <div id="adit-sugg" class="ai-response">Your study tip will appear here...</div>
+            <div id="adit-srgb" class="ai-response">Your study tip will appear here...</div>
           </div>
         </div>
         <div id="aryan" class="card">
@@ -98,17 +105,18 @@
         <div class="setting-item">
             <label for="theme-selector" class="setting-label">Choose Theme:</label>
             <div class="theme-selector" id="theme-selector">
+                {/* Final Theme List */}
                 <button class="theme-button" data-theme="dark" title="Dark Theme"></button>
                 <button class="theme-button" data-theme="light" title="Light Theme"></button>
-                <button class="theme-button" data-theme="sunset" title="Sunset Theme"></button>
-                <button class="theme-button" data-theme="forest" title="Forest Theme"></button>
-                <button class="theme-button" data-theme="retro" title="Retro Wave Theme"></button>
-                <button class="theme-button" data-theme="nature" title="Ambient Nature Theme"></button>
+                <button class="theme-button" data-theme="sakura" title="Sakura Blossom Theme"></button>
+                <button class="theme-button" data-theme="sunset" title="Tropical Sunset Theme"></button>
+                <button class="theme-button" data-theme="ocean" title="Ocean Depths Theme"></button>
+                <button class="theme-button" data-theme="zen" title="Zen Garden Theme"></button>
             </div>
         </div>
         <div class="setting-item">
             <label class="setting-label">More settings coming soon!</label>
-            </div>
+        </div>
     </section>
 
     <footer>
