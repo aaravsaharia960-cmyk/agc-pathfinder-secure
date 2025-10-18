@@ -41,21 +41,24 @@ function getSimulatedAiResponse(prompt, type = 'explanation') {
 }
 
 // --- DOM ELEMENT REFERENCES ---
-// Ensure elements exist before adding listeners or manipulating them
+// Added checks to prevent errors if elements aren't found
 const aditBtn = document.getElementById('adit-btn');
 const aditOut = document.getElementById('adit-sugg');
-const aditInput = document.getElementById('adit-q'); // Added input reference
+const aditInput = document.getElementById('adit-q');
 const aryanBtn = document.getElementById('aryan-btn');
 const aryanOut = document.getElementById('aryan-quiz');
-const aryanInput = document.getElementById('aryan-topic'); // Added input reference
-const themeButtons = document.querySelectorAll('.theme-button');
+const aryanInput = document.getElementById('aryan-topic');
+const themeSelector = document.getElementById('theme-selector'); // Get the container
 const subjectInput = document.getElementById('new-subject');
 const todoList = document.getElementById('todo-list');
 const achievementsList = document.getElementById('achievements-list');
 
 // --- AI HELPER LOGIC ---
 function runAi(button, outputElement, prompt, type) {
-    if (!button || !outputElement) return; // Prevent errors if elements don't exist
+    if (!button || !outputElement) {
+        console.error("AI button or output element not found!");
+        return;
+    }
 
     button.disabled = true;
     outputElement.innerHTML = "🧠 Thinking...";
@@ -90,20 +93,30 @@ window.genAryanQuiz = function() {
 }
 
 // --- UTILITY ---
-function parseMarkdown(text = "") { // Add default value
-    // Basic Markdown: Bold and Line Breaks
-    let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    // Handle list items more robustly
-    html = html.replace(/^\* (.*$)/gm, '<li>$1</li>'); // Convert * lines to <li>
-    html = html.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>'); // Wrap consecutive <li> in <ul>
-    html = html.replace(/<\/ul>\s*<ul>/g, ''); // Merge adjacent <ul>
-    // Basic newline to <br> conversion (only outside lists)
-    html = html.replace(/<br>\s*<li>/g, '<li>'); // Clean up breaks before list items
-    html = html.replace(/<\/li>\s*<br>/g, '</li>'); // Clean up breaks after list items
-    html = html.replace(/\n/g, '<br>'); // Convert remaining newlines
-    
+function parseMarkdown(text = "") {
+    let html = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+        .replace(/^\* (.*$)/gm, '<li>$1</li>'); // Convert * lines to <li>
+
+    // Wrap consecutive list items in <ul> tags
+    html = html.replace(/(<li>.*?<\/li>)/gs, (match) => {
+        // Only wrap if not already within a <ul> (basic check)
+        if (!match.includes('<ul>') && match.startsWith('<li>')) {
+            return `<ul>${match}</ul>`;
+        }
+        return match;
+    }).replace(/<\/ul>\s*<ul>/g, ''); // Merge adjacent <ul> tags
+
+    html = html.replace(/\n/g, '<br>'); // Convert remaining newlines to <br>
+    // Clean up <br> tags around list structures
+    html = html.replace(/<br>\s*<ul>/g, '<ul>');
+    html = html.replace(/<\/ul>\s*<br>/g, '</ul>');
+    html = html.replace(/<br>\s*<li>/g, '<li>');
+    html = html.replace(/<\/li>\s*<br>/g, '</li>');
+
     return html;
 }
+
 
 // --- THEME LOGIC ---
 const currentTheme = localStorage.getItem('theme') || 'dark';
@@ -118,17 +131,21 @@ function applyTheme(theme) {
         document.body.classList.add(themeClass);
     }
 
-    // Update active button state
-    themeButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.theme === theme);
-    });
+    // Update active button state inside the theme selector
+    const themeButtons = themeSelector ? themeSelector.querySelectorAll('.theme-button') : [];
+    if (themeButtons.length > 0) {
+        themeButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === theme);
+        });
+    }
 
     // Save the preference
     localStorage.setItem('theme', theme);
 }
 
-// Attach event listeners to theme buttons
-if (themeButtons.length > 0) {
+// Attach event listeners ONLY if the themeSelector exists
+if (themeSelector) {
+    const themeButtons = themeSelector.querySelectorAll('.theme-button');
     themeButtons.forEach(button => {
         button.addEventListener('click', () => {
             applyTheme(button.dataset.theme);
@@ -136,7 +153,10 @@ if (themeButtons.length > 0) {
     });
     // Apply the initial theme when the page loads
     applyTheme(currentTheme);
+} else {
+    console.warn("Theme selector element not found!");
 }
+
 
 // --- SUBJECT TRACKER LOGIC ---
 const icons = {
@@ -161,6 +181,7 @@ function createListItem(text, isAchievement = false) {
         const revertBtn = document.createElement('button');
         revertBtn.className = 'revert-btn';
         revertBtn.title = 'Move back to-do';
+        revertBtn.type = 'button'; // Explicitly set type
         revertBtn.innerHTML = icons.revert;
         revertBtn.onclick = () => revertToTodo(li);
         controlsDiv.appendChild(revertBtn);
@@ -168,6 +189,7 @@ function createListItem(text, isAchievement = false) {
         const completeBtn = document.createElement('button');
         completeBtn.className = 'complete-btn';
         completeBtn.title = 'Mark as complete';
+        completeBtn.type = 'button';
         completeBtn.innerHTML = icons.complete;
         completeBtn.onclick = () => moveToAchievements(li);
         controlsDiv.appendChild(completeBtn);
@@ -175,6 +197,7 @@ function createListItem(text, isAchievement = false) {
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         deleteBtn.title = 'Delete';
+        deleteBtn.type = 'button';
         deleteBtn.innerHTML = icons.delete;
         deleteBtn.onclick = () => li.remove();
         controlsDiv.appendChild(deleteBtn);
@@ -194,18 +217,22 @@ function addSubject() {
 }
 
 function moveToAchievements(listItem) {
-    if (!achievementsList) return;
+    if (!achievementsList || !listItem || !listItem.dataset) return;
     const text = listItem.dataset.text;
-    const newItem = createListItem(text, true);
-    achievementsList.appendChild(newItem);
+    if (text) {
+      const newItem = createListItem(text, true);
+      achievementsList.appendChild(newItem);
+    }
     listItem.remove();
 }
 
 function revertToTodo(listItem) {
-    if (!todoList) return;
+    if (!todoList || !listItem || !listItem.dataset) return;
     const text = listItem.dataset.text;
-    const newItem = createListItem(text, false);
-    todoList.appendChild(newItem);
+    if (text) {
+      const newItem = createListItem(text, false);
+      todoList.appendChild(newItem);
+    }
     listItem.remove();
 }
 
@@ -213,10 +240,18 @@ function revertToTodo(listItem) {
 if (subjectInput) {
     subjectInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent potential form submission
             addSubject();
         }
     });
 }
 
-// Make addSubject globally available if needed by inline onclick
+// Make addSubject globally available if needed by inline onclick in HTML
 window.addSubject = addSubject;
+
+// --- INITIALIZATION ---
+// Add any setup code here if needed when the DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("AGC Pathfinder Initialized!");
+    // You could load saved subjects from localStorage here if you add that feature
+});

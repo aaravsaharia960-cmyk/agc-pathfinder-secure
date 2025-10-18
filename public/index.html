@@ -17,16 +17,10 @@
       </div>
     </div>
     <nav class="main-nav small">
+      <a href="#about">About</a>
       <a href="#tracker">Tracker</a>
       <a href="#ai-helpers">AI</a>
-      <div class="theme-selector" id="theme-selector">
-        <button class="theme-button" data-theme="dark" title="Dark Theme"></button>
-        <button class="theme-button" data-theme="light" title="Light Theme"></button>
-        <button class="theme-button" data-theme="sunset" title="Sunset Theme"></button>
-        <button class="theme-button" data-theme="forest" title="Forest Theme"></button>
-        <button class="theme-button" data-theme="retro" title="Retro Wave Theme"></button>
-        <button class="theme-button" data-theme="nature" title="Ambient Nature Theme"></button>
-      </div>
+      <a href="#settings">Settings</a> {/* New Settings Link */}
     </nav>
   </header>
 
@@ -40,6 +34,7 @@
       </div>
       <div>
         <div class="card illustration-card">
+          {/* SVG Illustration remains the same */}
           <svg width="100%" height="160" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <rect x="0" y="0" width="220" height="160" rx="12" fill="var(--glass)" />
             <circle cx="60" cy="60" r="28" fill="color-mix(in srgb, var(--accent) 15%, transparent)" />
@@ -98,6 +93,27 @@
           </div>
         </div>
       </div>
+    </section>
+
+    {/* New Settings Section */}
+    <section id="settings" class="card">
+        <h2>Settings</h2>
+        <div class="setting-item">
+            <label for="theme-selector" class="setting-label">Choose Theme:</label>
+            <div class="theme-selector" id="theme-selector">
+                <button class="theme-button" data-theme="dark" title="Dark Theme"></button>
+                <button class="theme-button" data-theme="light" title="Light Theme"></button>
+                <button class="theme-button" data-theme="sunset" title="Sunset Theme"></button>
+                <button class="theme-button" data-theme="forest" title="Forest Theme"></button>
+                <button class="theme-button" data-theme="retro" title="Retro Wave Theme"></button>
+                <button class="theme-button" data-theme="nature" title="Ambient Nature Theme"></button>
+            </div>
+        </div>
+        {/* Placeholder for future settings */}
+        <div class="setting-item">
+            <label class="setting-label">More settings coming soon!</label>
+            {/* Example: <input type="checkbox" id="some-setting"> <label for="some-setting">Enable Feature X</label> */}
+        </div>
     </section>
 
     <footer>
